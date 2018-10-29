@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="ldso_ros" type="ldso_ros_node" name="ldso" output="screen">
+  </node>
+</launch>
