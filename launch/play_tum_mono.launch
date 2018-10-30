@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="ldso_ros" type="play_tum_mono" name="play_tum_mono" output="screen">    
+    <param name="data_path" value="/home/syllogismrxs/Documents/data/tum-mono/sequence_12" type="str"/>    
+  </node>
+</launch>

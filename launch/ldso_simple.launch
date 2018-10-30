@@ -1,5 +1,5 @@
 <launch>
-  <node pkg="ldso_ros" type="ldso_ros_node" name="ldso" output="screen">
+  <node pkg="ldso_ros" type="ldso_ros_simple_node" name="ldso_ros_simple" output="screen">
     <param name="voc_path" value="/home/syllogismrxs/repos/vision/LDSO/vocab/orbvoc.dbow3" type="str"/>
     <param name="calibration_data_path" value="/home/syllogismrxs/Documents/data/tum-mono/sequence_12" type="str"/>    
   </node>
