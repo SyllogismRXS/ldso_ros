@@ -4,18 +4,30 @@
 
 #include <memory>
 
-std::string vocPath = "/home/syllogismrxs/repos/vision/LDSO/vocab/orbvoc.dbow3";
-
-std::string dataset_path = "/home/syllogismrxs/Documents/data/tum-mono/sequence_12";
-std::string vignette = dataset_path + "/vignette.png";
-std::string gammaCalib = dataset_path + "/pcalib.txt";
-std::string source = dataset_path + "/images.zip";
-std::string calib = dataset_path + "/camera.txt";
-std::string output_file = "./results.txt";
-
 int main(int argc, char **argv) {
     // Init ROS
     ros::init(argc, argv, "ldso");
+
+    // Get ROS parameters
+    ros::NodeHandle private_nh("~");
+
+    std::string voc_path;
+    if (not private_nh.getParam("voc_path", voc_path)) {
+        ROS_ERROR_STREAM("Missing voc_path");
+        return -1;
+    }
+
+    std::string calibration_data_path;
+    if (not private_nh.getParam("calibration_data_path", calibration_data_path)) {
+        ROS_ERROR_STREAM("Missing calibration_data_path");
+        return -1;
+    }
+    std::string vignette = calibration_data_path + "/vignette.png";
+    std::string gammaCalib = calibration_data_path + "/pcalib.txt";
+    std::string source = calibration_data_path + "/images.zip";
+    std::string calib = calibration_data_path + "/camera.txt";
+    std::string output_file = "./results.txt";
+
     ros::NodeHandle n;
     ros::Rate loop_rate(10);
 
@@ -33,7 +45,7 @@ int main(int argc, char **argv) {
     reader->setGlobalCalibration();
 
     std::shared_ptr<ORBVocabulary> voc = std::make_shared<ORBVocabulary>();
-    voc->load(vocPath);
+    voc->load(voc_path);
 
     std::shared_ptr<FullSystem> fullSystem = std::make_shared<FullSystem>(voc);
     fullSystem->setGammaFunction(reader->getPhotometricGamma());
@@ -122,9 +134,9 @@ int main(int argc, char **argv) {
         }
 
         fullSystem->blockUntilMappingIsFinished();
-        cout << "Sleeping..." << endl;
-        sleep(10);
-        cout << "Done sleeping" << endl;
+        //cout << "Sleeping..." << endl;
+        //sleep(10);
+        //cout << "Done sleeping" << endl;
 
         clock_t ended = clock();
         struct timeval tv_end;
@@ -159,11 +171,13 @@ int main(int argc, char **argv) {
         //     tmlog.close();
         // }
         cout << "Thread complete!" << endl;
-    });
+                          });
+
+    std::thread viewer_thread([&]() {
+        viewer->run();  // mac os should keep this in main thread.
+                          });
 
     while (ros::ok()) {
-        viewer->run();  // mac os should keep this in main thread.
-
         ros::spinOnce();
         loop_rate.sleep();
     }
